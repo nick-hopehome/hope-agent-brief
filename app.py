@@ -575,8 +575,14 @@ def generate():
         safe_addr = "".join(c for c in address if c.isalnum() or c in ' _-').strip().replace(' ', '_')
         filename = f"Agent_Advisory_{safe_addr}.pdf"
 
-        return send_file(output_path, as_attachment=False,
-                        download_name=filename, mimetype='application/pdf')
+        # Save to output dir and return a URL — avoids all blob/popup issues on mobile
+        output_dir = os.path.join(os.path.dirname(__file__), 'output_pdfs')
+        os.makedirs(output_dir, exist_ok=True)
+        final_path = os.path.join(output_dir, filename)
+        import shutil
+        shutil.move(output_path, final_path)
+
+        return jsonify({'pdf_url': f'/pdf/{filename}'})
 
     except json.JSONDecodeError as e:
         return jsonify({'error': f'Failed to parse Claude response as JSON: {str(e)}'}), 500
@@ -587,6 +593,15 @@ def generate():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
+@app.route('/pdf/<filename>')
+def serve_pdf(filename):
+    """Serve a generated PDF by filename."""
+    output_dir = os.path.join(os.path.dirname(__file__), 'output_pdfs')
+    path = os.path.join(output_dir, filename)
+    if not os.path.exists(path):
+        return "PDF not found", 404
+    return send_file(path, mimetype='application/pdf')
 
 # ── Negotiation routes ─────────────────────────────────────────────
 @app.route('/negotiate')
@@ -622,8 +637,13 @@ def negotiate_generate():
         safe = "".join(c for c in addr if c.isalnum() or c in ' _-').strip().replace(' ', '_')
         filename = f"Negotiation_Addendum_{safe}.pdf"
 
-        return send_file(output_path, as_attachment=False,
-                        download_name=filename, mimetype='application/pdf')
+        output_dir = os.path.join(os.path.dirname(__file__), 'output_pdfs')
+        os.makedirs(output_dir, exist_ok=True)
+        final_path = os.path.join(output_dir, filename)
+        import shutil
+        shutil.move(output_path, final_path)
+
+        return jsonify({'pdf_url': f'/pdf/{filename}'})
 
     except Exception as e:
         traceback.print_exc()
