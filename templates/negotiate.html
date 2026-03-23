@@ -251,11 +251,11 @@
 
     <button type="submit" class="submit-btn" id="submitBtn">Generate My Negotiation Strategy</button>
 
-    <div class="status loading" id="statusLoading">
+    <div class="status loading" id="statusLoading" style="display:none;">
       <div class="spinner"></div>
       <div>
         <div id="statusText">Analyzing your deal context...</div>
-        <div style="font-size:12px;color:#2C5F2E;margin-top:3px">Building your tailored strategy — about 30 seconds</div>
+        <div style="font-size:12px;color:#2C5F2E;margin-top:3px">Building your tailored strategy — 30 to 60 seconds</div>
       </div>
     </div>
     <div class="status error" id="statusError"></div>
@@ -348,7 +348,7 @@
     const timer = setInterval(() => {
       i = Math.min(i+1, steps.length-1);
       document.getElementById('statusText').textContent = steps[i];
-    }, 8000);
+    }, 15000);
 
     try {
       const response = await fetch('/negotiate/generate', { method: 'POST', body: new FormData(this) });
