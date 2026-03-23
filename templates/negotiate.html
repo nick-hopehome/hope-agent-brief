@@ -362,7 +362,14 @@
       const response = await fetch('/negotiate/generate', { method: 'POST', body: new FormData(this) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Generation failed.');
-      window.location.href = result.pdf_url;
+      // Open addendum in new tab, keep questionnaire tab open
+      const pdfLink = document.createElement('a');
+      pdfLink.href = result.pdf_url;
+      pdfLink.target = '_blank';
+      pdfLink.rel = 'noopener noreferrer';
+      document.body.appendChild(pdfLink);
+      pdfLink.click();
+      document.body.removeChild(pdfLink);
     } catch(err) {
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
