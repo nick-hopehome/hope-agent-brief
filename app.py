@@ -2,6 +2,7 @@ import os
 import json
 import tempfile
 import traceback
+import urllib.parse
 from flask import Flask, request, jsonify, send_file, render_template
 import anthropic
 import pdfplumber
@@ -14,9 +15,6 @@ from reportlab.platypus import (
     HRFlowable, KeepTogether
 )
 from reportlab.lib.enums import TA_CENTER
-from PIL import Image
-import numpy as np
-import base64
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max upload
@@ -66,12 +64,34 @@ def mk_styles():
         'windmit_v':s('windmit_v',fontSize=7.5,leading=10),
     }
 
+_logo_path_cache = None
+
 def get_logo_path():
     """Return path to white logo, creating it if needed."""
-    logo_path = "/tmp/logo_white.png"
+    global _logo_path_cache
+    if _logo_path_cache and os.path.exists(_logo_path_cache):
+        return _logo_path_cache
     src = os.path.join(os.path.dirname(__file__), "logo_white.png")
     if os.path.exists(src):
+        _logo_path_cache = src
         return src
+    # Try to create from original if available
+    orig = os.path.join(os.path.dirname(__file__), "LOGO_-__Navy_white_no_background.png")
+    if os.path.exists(orig):
+        try:
+            from PIL import Image
+            import numpy as np
+            img = Image.open(orig).convert("RGB")
+            arr = np.array(img)
+            r, g, b = arr[:,:,0], arr[:,:,1], arr[:,:,2]
+            black_mask = (r < 30) & (g < 30) & (b < 30)
+            rgba = np.zeros((arr.shape[0], arr.shape[1], 4), dtype=np.uint8)
+            rgba[~black_mask] = [255, 255, 255, 255]
+            Image.fromarray(rgba, 'RGBA').save(src)
+            _logo_path_cache = src
+            return src
+        except Exception:
+            pass
     return None
 
 def on_page(logo_path):
@@ -118,20 +138,22 @@ def ftable(rows, tc, bg, ST, cr=False):
     t=Table(data,colWidths=cws,repeatRows=1); t.setStyle(TableStyle(cmds)); return t
 
 def extract_pdf_text(pdf_bytes):
-    """Extract text from PDF bytes using pdfplumber."""
+    """Extract text from PDF bytes using pdfplumber, page by page to reduce memory."""
     with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
         f.write(pdf_bytes)
-        f.flush()
-        try:
-            with pdfplumber.open(f.name) as pdf:
-                text = ""
-                for page in pdf.pages:
-                    t = page.extract_text()
-                    if t:
-                        text += t + "\n"
-            return text
-        finally:
-            os.unlink(f.name)
+        tmp_path = f.name
+    try:
+        text_parts = []
+        with pdfplumber.open(tmp_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t:
+                    text_parts.append(t)
+                # Explicitly close page to free memory
+                page.close()
+        return "\n".join(text_parts)
+    finally:
+        os.unlink(tmp_path)
 
 def analyze_with_claude(inspection_text, year_built, fourpoint_text=None,
                          windmit_text=None, wdo_text=None):
@@ -469,7 +491,7 @@ def build_pdf(data, logo_path, output_path):
             ST['nq']),
         Spacer(1,6),
         Paragraph(
-            f"<b>Get your tailored strategy:</b> Visit <b>https://hope-agent-brief.onrender.com/negotiate"
+            f"<b>Get your tailored strategy:</b> Visit <b>yourapp.onrender.com/negotiate"
             f"?property={urllib.parse.quote(prop_addr)}</b> on any device. "
             "Answer 10 questions and download your Negotiation Addendum PDF in about 30 seconds.",
             ST['nq']),
@@ -553,8 +575,6 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=False)
 
 # ── Negotiation routes ─────────────────────────────────────────────
-from negotiate import analyze_negotiation, build_addendum as build_neg_addendum
-
 @app.route('/negotiate')
 def negotiate_form():
     return render_template('negotiate.html')
@@ -562,6 +582,7 @@ def negotiate_form():
 @app.route('/negotiate/generate', methods=['POST'])
 def negotiate_generate():
     try:
+        from negotiate import analyze_negotiation, build_addendum as build_neg_addendum
         form_data = {k: request.form.get(k, '') for k in request.form}
 
         strategy = analyze_negotiation(form_data, ANTHROPIC_API_KEY)
