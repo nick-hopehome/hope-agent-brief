@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Negotiation Strategy — Hope Home Inspections</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: #14285A;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  header h1 { color: white; font-size: 17px; font-weight: 700; }
+  header p { color: #A0AEC0; font-size: 12px; }
+
+  .intro-bar {
+    background: #2C5F2E;
+    color: white;
+    text-align: center;
+    padding: 12px 20px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  main {
+    flex: 1;
+    max-width: 720px;
+    width: 100%;
+    margin: 28px auto;
+    padding: 0 16px;
+  }
+
+  .property-badge {
+    background: #14285A;
+    color: white;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+
+  .property-badge strong { display: block; font-size: 16px; margin-bottom: 2px; }
+  .property-badge span { color: #A0AEC0; font-size: 12px; }
+
+  .card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    padding: 24px 28px;
+    margin-bottom: 18px;
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #14285A;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h2 .icon { font-size: 16px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+
+  label .sub {
+    display: block;
+    font-weight: 400;
+    color: #6B7280;
+    font-size: 11.5px;
+    margin-top: 2px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1F2937;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    background: white;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #14285A;
+    box-shadow: 0 0 0 3px rgba(20,40,90,0.08);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 540px) { .two-col { grid-template-columns: 1fr; } }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .radio-opt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid #D1D5DB;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .radio-opt input[type="radio"] { display: none; }
+
+  .radio-opt:has(input:checked) {
+    background: #14285A;
+    border-color: #14285A;
+    color: white;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: #2C5F2E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .submit-btn:hover:not(:disabled) { background: #245026; }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .status {
+    display: none;
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .status.loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F0FAF0;
+    color: #2C5F2E;
+    border: 1px solid #A8D5AA;
+  }
+
+  .status.error {
+    display: block;
+    background: #FDEDEC;
+    color: #C0392B;
+    border: 1px solid #F5C6C2;
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid #A8D5AA;
+    border-top-color: #2C5F2E;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .contact-footer {
+    text-align: center;
+    padding: 20px 16px 28px;
+    color: #6B7280;
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+
+  .contact-footer strong { color: #14285A; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hope Home Inspections</h1>
+  <p>Negotiation Strategy Questionnaire</p>
+</header>
+
+<div class="intro-bar">
+  Answer a few questions about your deal and get a tailored negotiation strategy PDF in about 30 seconds.
+</div>
+
+<main>
+
+  <div class="property-badge">
+    <strong id="propertyDisplay">Loading property...</strong>
+    <span>Agent Advisory — Negotiation Addendum</span>
+  </div>
+
+  <form id="negForm">
+    <input type="hidden" name="property_address" id="property_address">
+    <input type="hidden" name="inspection_date" id="inspection_date">
+
+    <!-- Agent Info -->
+    <div class="card">
+      <h2><span class="icon">👤</span> Your Information</h2>
+      <div class="two-col">
+        <div class="field">
+          <label>Your Name</label>
+          <input type="text" name="agent_name" placeholder="Beth Cupari" required>
+        </div>
+        <div class="field">
+          <label>Brokerage</label>
+          <input type="text" name="agent_company" placeholder="Coastal Properties Group">
+        </div>
+      </div>
+    </div>
+
+    <!-- Seller Situation -->
+    <div class="card">
+      <h2><span class="icon">🏠</span> Seller Situation</h2>
+
+      <div class="field">
+        <label>Seller Type</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="seller_type" value="Individual owner"> Individual owner</label>
+          <label class="radio-opt"><input type="radio" name="seller_type" value="Investor"> Investor</label>
+          <label class="radio-opt"><input type="radio" name="seller_type" value="Estate sale"> Estate sale</label>
+          <label class="radio-opt"><input type="radio" name="seller_type" value="Unknown"> Unknown</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Property Occupancy</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="occupancy" value="Owner occupied"> Owner occupied</label>
+          <label class="radio-opt"><input type="radio" name="occupancy" value="Tenant occupied"> Tenant occupied</label>
+          <label class="radio-opt"><input type="radio" name="occupancy" value="Vacant"> Vacant</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Reason for Selling
+          <span class="sub">If known — job relocation, downsizing, divorce, financial, etc.</span>
+        </label>
+        <input type="text" name="reason_selling" placeholder="e.g. Relocating for work">
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Previously Listed?</label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="prev_listed" value="Yes"> Yes</label>
+            <label class="radio-opt"><input type="radio" name="prev_listed" value="No"> No</label>
+            <label class="radio-opt"><input type="radio" name="prev_listed" value="Unknown"> Unknown</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Seller Timeline Pressure</label>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="timeline" value="High — needs to close fast"> High</label>
+            <label class="radio-opt"><input type="radio" name="timeline" value="Moderate"> Moderate</label>
+            <label class="radio-opt"><input type="radio" name="timeline" value="Low — flexible"> Low</label>
+            <label class="radio-opt"><input type="radio" name="timeline" value="Unknown"> Unknown</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal Dynamics -->
+    <div class="card">
+      <h2><span class="icon">📊</span> Deal Dynamics</h2>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Days on Market</label>
+          <input type="number" name="dom" placeholder="e.g. 47" min="0">
+        </div>
+        <div class="field">
+          <label>Multiple Offers Present?</label>
+          <div class="radio-group" style="margin-top:6px">
+            <label class="radio-opt"><input type="radio" name="multiple_offers" value="Yes"> Yes</label>
+            <label class="radio-opt"><input type="radio" name="multiple_offers" value="No"> No</label>
+            <label class="radio-opt"><input type="radio" name="multiple_offers" value="Unknown"> Unknown</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>List Price ($)</label>
+          <input type="text" name="list_price" placeholder="e.g. 525,000">
+        </div>
+        <div class="field">
+          <label>Offer Price ($)</label>
+          <input type="text" name="offer_price" placeholder="e.g. 510,000">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Concessions Already in Contract
+          <span class="sub">Closing cost contributions, repairs already agreed to, etc.</span>
+        </label>
+        <input type="text" name="concessions" placeholder="e.g. $5,000 closing cost credit already agreed">
+      </div>
+    </div>
+
+    <!-- Inspection Context -->
+    <div class="card">
+      <h2><span class="icon">🔍</span> Inspection Context</h2>
+
+      <div class="field">
+        <label>Was the seller aware of any major findings prior to this inspection?</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="seller_aware" value="Yes — disclosed"> Yes, disclosed</label>
+          <label class="radio-opt"><input type="radio" name="seller_aware" value="Possibly, undisclosed"> Possibly, undisclosed</label>
+          <label class="radio-opt"><input type="radio" name="seller_aware" value="No"> No</label>
+          <label class="radio-opt"><input type="radio" name="seller_aware" value="Unknown"> Unknown</label>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Previous inspection that fell through?</label>
+          <div class="radio-group" style="margin-top:6px">
+            <label class="radio-opt"><input type="radio" name="prev_inspection" value="Yes"> Yes</label>
+            <label class="radio-opt"><input type="radio" name="prev_inspection" value="No"> No</label>
+            <label class="radio-opt"><input type="radio" name="prev_inspection" value="Unknown"> Unknown</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Recently renovated or flipped?</label>
+          <div class="radio-group" style="margin-top:6px">
+            <label class="radio-opt"><input type="radio" name="flip" value="Yes"> Yes</label>
+            <label class="radio-opt"><input type="radio" name="flip" value="No"> No</label>
+            <label class="radio-opt"><input type="radio" name="flip" value="Unknown"> Unknown</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Key findings you want to address
+          <span class="sub">List the items from the brief you plan to negotiate on</span>
+        </label>
+        <textarea name="key_findings" placeholder="e.g. Active moisture intrusion, non-functional fireplace, pool deficiencies, insulation gaps"></textarea>
+      </div>
+    </div>
+
+    <!-- Agent Read -->
+    <div class="card">
+      <h2><span class="icon">🎯</span> Your Read on the Deal</h2>
+
+      <div class="field">
+        <label>How flexible do you think the seller will be on inspection items?</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Very flexible — motivated to close"> Very flexible</label>
+          <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Somewhat flexible"> Somewhat flexible</label>
+          <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Firm — will push back"> Firm</label>
+          <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Unknown"> Unknown</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Buyer's risk tolerance</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="buyer_risk" value="Low — wants everything addressed"> Low — wants everything addressed</label>
+          <label class="radio-opt"><input type="radio" name="buyer_risk" value="Moderate — focused on major items"> Moderate</label>
+          <label class="radio-opt"><input type="radio" name="buyer_risk" value="High — willing to take the house as-is with credit"> High — willing to take as-is</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Anything else I should know about this deal?
+          <span class="sub">Relationship dynamics, listing agent personality, any other context</span>
+        </label>
+        <textarea name="other_context" placeholder="e.g. Listing agent is aggressive, seller has already moved out, buyer is emotionally attached to the home..."></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">
+      Generate My Negotiation Strategy
+    </button>
+
+    <div class="status loading" id="statusLoading">
+      <div class="spinner"></div>
+      <div>
+        <div id="statusText">Analyzing your deal context...</div>
+        <div style="font-size:12px;color:#2C5F2E;margin-top:3px">Building your tailored strategy — about 30 seconds</div>
+      </div>
+    </div>
+
+    <div class="status error" id="statusError"></div>
+
+  </form>
+</main>
+
+<div class="contact-footer">
+  Questions about your inspection or want to talk through the deal?<br>
+  <strong>Nick Linse — Hope Home Inspections</strong><br>
+  📱 (813) 777-6265 call or text &nbsp;|&nbsp; ✉️ Nick-L@hopehomeinspections.com
+</div>
+
+<script>
+  // Pre-fill property from URL params
+  const params = new URLSearchParams(window.location.search);
+  const addr = params.get('property') || '';
+  const date = params.get('date') || '';
+
+  document.getElementById('property_address').value = addr;
+  document.getElementById('inspection_date').value = date;
+  document.getElementById('propertyDisplay').textContent = addr || 'Agent Advisory Negotiation';
+
+  document.getElementById('negForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const loading = document.getElementById('statusLoading');
+    const errorEl = document.getElementById('statusError');
+
+    btn.disabled = true;
+    loading.style.display = 'flex';
+    errorEl.style.display = 'none';
+
+    const steps = [
+      'Analyzing your deal context...',
+      'Assessing leverage position...',
+      'Prioritizing negotiation items...',
+      'Building your strategy...',
+    ];
+    let i = 0;
+    const timer = setInterval(() => {
+      i = Math.min(i + 1, steps.length - 1);
+      document.getElementById('statusText').textContent = steps[i];
+    }, 8000);
+
+    try {
+      const formData = new FormData(this);
+      const response = await fetch('/negotiate/generate', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Generation failed. Please try again.');
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      const filename = match ? match[1] : 'Negotiation_Addendum.pdf';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    } finally {
+      clearInterval(timer);
+      loading.style.display = 'none';
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
