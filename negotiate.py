@@ -364,8 +364,8 @@ def build_addendum(form_data, strategy, logo_path, output_path):
     story.append(HRFlowable(width=CW, thickness=0.4, color=RULE))
     story.append(Spacer(1, 5))
     story.append(Paragraph(
-        "Questions about this strategy or want to talk through the deal? "
-        "Reach Nick directly at <b>(813) 777-6265</b> call or text, "
+        "Questions about the inspection findings? "
+        "Reach Nick directly at <b>(813) 777-6265</b> call or text, \"\n"
         "or email Nick-L@hopehomeinspections.com. "
         "This addendum is a supplement to the Agent Advisory Brief and should be read alongside it.",
         ST['disc']))
