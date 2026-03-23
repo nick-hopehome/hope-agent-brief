@@ -368,11 +368,11 @@
       <span>Generate Agent Advisory Brief</span>
     </button>
 
-    <div class="status loading" id="statusLoading">
+    <div class="status loading" id="statusLoading" style="display:none;">
       <div class="spinner"></div>
       <div>
         <div id="statusText">Extracting report data...</div>
-        <div class="progress-steps" id="statusSub">This takes about 30 to 60 seconds</div>
+        <div class="progress-steps" id="statusSub">This typically takes 1 to 2 minutes</div>
       </div>
     </div>
 
@@ -414,11 +414,11 @@ function fileSelected(input, wrapperId) {
 }
 
 const steps = [
-  ['Extracting report data...', 'Reading PDF content'],
+  ['Extracting report data...', 'Reading PDF content — 1 to 2 minutes total'],
   ['Analyzing findings...', 'Claude is reviewing all inspection documents'],
   ['Tiering deficiencies...', 'Applying safety, functional, and cosmetic classifications'],
   ['Building negotiation strategy...', 'Calculating credit ranges and repair recommendations'],
-  ['Generating PDF...', 'Formatting your Agent Advisory Brief'],
+  ['Generating PDF...', 'Almost done — formatting your Agent Advisory Brief'],
 ];
 
 let stepIdx = 0;
@@ -430,7 +430,7 @@ function startSteps() {
   stepTimer = setInterval(() => {
     stepIdx = Math.min(stepIdx + 1, steps.length - 1);
     updateStep();
-  }, 12000);
+  }, 25000);
 }
 
 function updateStep() {
