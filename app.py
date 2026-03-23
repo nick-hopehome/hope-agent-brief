@@ -5,7 +5,7 @@ import traceback
 import urllib.parse
 from flask import Flask, request, jsonify, send_file, render_template
 import anthropic
-import pdfplumber
+import fitz  # pymupdf
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -138,22 +138,14 @@ def ftable(rows, tc, bg, ST, cr=False):
     t=Table(data,colWidths=cws,repeatRows=1); t.setStyle(TableStyle(cmds)); return t
 
 def extract_pdf_text(pdf_bytes):
-    """Extract text from PDF bytes using pdfplumber, page by page to reduce memory."""
-    with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
-        f.write(pdf_bytes)
-        tmp_path = f.name
-    try:
-        text_parts = []
-        with pdfplumber.open(tmp_path) as pdf:
-            for page in pdf.pages:
-                t = page.extract_text()
-                if t:
-                    text_parts.append(t)
-                # Explicitly close page to free memory
-                page.close()
-        return "\n".join(text_parts)
-    finally:
-        os.unlink(tmp_path)
+    """Extract text from PDF bytes using pymupdf (text only, no image decoding)."""
+    text_parts = []
+    with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+        for page in doc:
+            t = page.get_text("text")
+            if t:
+                text_parts.append(t)
+    return "\n".join(text_parts)
 
 def analyze_with_claude(inspection_text, year_built, fourpoint_text=None,
                          windmit_text=None, wdo_text=None):
