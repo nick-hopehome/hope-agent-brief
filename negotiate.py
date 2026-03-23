@@ -140,8 +140,31 @@ OUTPUT FORMAT — return ONLY valid JSON, no markdown:
   "total_ask_recommendation": "Recommended total credit ask amount with brief rationale"
 }"""
 
+    # Parse item selections if provided
+    item_selections_raw = form_data.get('item_selections', '{}')
+    try:
+        item_selections = json.loads(item_selections_raw)
+    except Exception:
+        item_selections = {}
+
+    # Format selections for the prompt
+    selections_text = ""
+    if item_selections:
+        repair_sel = [k for k,v in item_selections.items() if v == 'Repair']
+        credit_sel = [k for k,v in item_selections.items() if v == 'Credit']
+        neither_sel = [k for k,v in item_selections.items() if v == 'Neither']
+        if repair_sel:
+            selections_text += f"\nAgent wants to request REPAIR for: {', '.join(repair_sel)}"
+        if credit_sel:
+            selections_text += f"\nAgent wants to request CREDIT for: {', '.join(credit_sel)}"
+        if neither_sel:
+            selections_text += f"\nAgent has chosen NOT to pursue: {', '.join(neither_sel)}"
+
     user = f"""PROPERTY: {form_data.get('property_address', 'Unknown')}
 INSPECTION DATE: {form_data.get('inspection_date', 'Unknown')}
+AGENT: {form_data.get('agent_name', 'Unknown')} — {form_data.get('agent_company', 'Unknown')}
+
+AGENT'S ITEM SELECTIONS:{selections_text if selections_text else ' None provided — use your best judgment based on deal context.'}
 
 SELLER SITUATION:
 - Seller type: {form_data.get('seller_type', 'Unknown')}
