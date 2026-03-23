@@ -371,7 +371,7 @@
       <div class="spinner"></div>
       <div style="flex:1">
         <div id="statusText" style="font-weight:600;">Starting...</div>
-        <div class="progress-steps" id="statusSub" style="margin-top:3px;">This typically takes 1 to 2 minutes — do not close this page</div>
+        <div class="progress-steps" id="statusSub" style="margin-top:3px;">This takes 2 to 3 minutes — do not close this page</div>
         <div style="margin-top:6px;font-size:12px;color:#3A6EA5;" id="elapsedText"></div>
       </div>
     </div>
@@ -427,7 +427,7 @@ function startProgress() {
   stepIdx = 0;
   startTime = Date.now();
   document.getElementById('statusText').textContent = steps[0];
-  document.getElementById('statusSub').textContent = 'This takes 1 to 2 minutes — do not close this page';
+  document.getElementById('statusSub').textContent = 'This takes 2 to 3 minutes — do not close this page';
 
   stepTimer = setInterval(() => {
     stepIdx = Math.min(stepIdx + 1, steps.length - 1);
