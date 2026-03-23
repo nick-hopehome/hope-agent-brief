@@ -469,7 +469,14 @@ document.getElementById('briefForm').addEventListener('submit', async function(e
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Generation failed. Please try again.');
     // Direct navigation — works on all devices, no popup blocker issues
-    window.location.href = result.pdf_url;
+    // Open PDF in new tab, keep current tab ready for next inspection
+    const pdfLink = document.createElement('a');
+    pdfLink.href = result.pdf_url;
+    pdfLink.target = '_blank';
+    pdfLink.rel = 'noopener noreferrer';
+    document.body.appendChild(pdfLink);
+    pdfLink.click();
+    document.body.removeChild(pdfLink);
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.style.display = 'block';
