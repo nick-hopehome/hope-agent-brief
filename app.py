@@ -469,7 +469,7 @@ def build_pdf(data, logo_path, output_path):
             ST['nq']),
         Spacer(1,6),
         Paragraph(
-            f"<b>Get your tailored strategy:</b> Visit <b>hope-agent-brief.onrender.com/negotiate"
+            f"<b>Get your tailored strategy:</b> Visit <b>https://hope-agent-brief.onrender.com/negotiate"
             f"?property={urllib.parse.quote(prop_addr)}</b> on any device. "
             "Answer 10 questions and download your Negotiation Addendum PDF in about 30 seconds.",
             ST['nq']),
