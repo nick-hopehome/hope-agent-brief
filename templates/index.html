@@ -415,7 +415,7 @@ function fileSelected(input, wrapperId) {
 
 const steps = [
   'Uploading and extracting PDF content...',
-  'Analyzing findings with Claude AI...',
+  'Analyzing findings...',
   'Tiering deficiencies and building negotiation strategy...',
   'Generating your Agent Advisory Brief PDF...',
   'Almost done — finalizing your brief...',
@@ -466,20 +466,10 @@ document.getElementById('briefForm').addEventListener('submit', async function(e
 
   try {
     const response = await fetch('/generate', { method: 'POST', body: formData });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Generation failed. Please try again.');
-    }
-    // Mobile-safe PDF open: use location.href on same tab via blob URL
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 1000);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Generation failed. Please try again.');
+    // Direct navigation — works on all devices, no popup blocker issues
+    window.location.href = result.pdf_url;
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.style.display = 'block';
