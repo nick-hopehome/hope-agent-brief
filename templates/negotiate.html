@@ -6,222 +6,55 @@
 <title>Negotiation Strategy — Hope Home Inspections</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f0f2f5;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  header {
-    background: #14285A;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: #14285A; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
   header h1 { color: white; font-size: 17px; font-weight: 700; }
   header p { color: #A0AEC0; font-size: 12px; }
-
-  .intro-bar {
-    background: #2C5F2E;
-    color: white;
-    text-align: center;
-    padding: 12px 20px;
-    font-size: 13px;
-    line-height: 1.5;
-  }
-
-  main {
-    flex: 1;
-    max-width: 720px;
-    width: 100%;
-    margin: 28px auto;
-    padding: 0 16px;
-  }
-
-  .property-badge {
-    background: #14285A;
-    color: white;
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
-    font-size: 14px;
-  }
-
+  .intro-bar { background: #2C5F2E; color: white; text-align: center; padding: 12px 20px; font-size: 13px; line-height: 1.5; }
+  main { flex: 1; max-width: 720px; width: 100%; margin: 28px auto; padding: 0 16px; }
+  .property-badge { background: #14285A; color: white; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; }
   .property-badge strong { display: block; font-size: 16px; margin-bottom: 2px; }
   .property-badge span { color: #A0AEC0; font-size: 12px; }
-
-  .card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    padding: 24px 28px;
-    margin-bottom: 18px;
-  }
-
-  .card h2 {
-    font-size: 14px;
-    font-weight: 700;
-    color: #14285A;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #E2E8F0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card h2 .icon { font-size: 16px; }
-
+  .card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 24px 28px; margin-bottom: 18px; }
+  .card h2 { font-size: 14px; font-weight: 700; color: #14285A; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; gap: 8px; }
+  .prefilled-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .prefilled-info { background: #F0F2F5; border-radius: 6px; padding: 12px 14px; font-size: 13px; color: #374151; }
+  .prefilled-info strong { color: #14285A; display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
-
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
-  }
-
-  label .sub {
-    display: block;
-    font-weight: 400;
-    color: #6B7280;
-    font-size: 11.5px;
-    margin-top: 2px;
-  }
-
-  input[type="text"],
-  input[type="number"],
-  select,
-  textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #D1D5DB;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #1F2937;
-    font-family: inherit;
-    transition: border-color 0.15s;
-    background: white;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: #14285A;
-    box-shadow: 0 0 0 3px rgba(20,40,90,0.08);
-  }
-
+  label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  label .sub { display: block; font-weight: 400; color: #6B7280; font-size: 11.5px; margin-top: 2px; }
+  input[type="text"], input[type="number"], textarea { width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 14px; color: #1F2937; font-family: inherit; transition: border-color 0.15s; background: white; }
+  input:focus, textarea:focus { outline: none; border-color: #14285A; box-shadow: 0 0 0 3px rgba(20,40,90,0.08); }
   textarea { resize: vertical; min-height: 80px; }
-
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-
-  @media (max-width: 540px) { .two-col { grid-template-columns: 1fr; } }
-
-  .radio-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-  }
-
-  .radio-opt {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: 1px solid #D1D5DB;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #374151;
-    transition: all 0.15s;
-    user-select: none;
-  }
-
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 540px) { .two-col { grid-template-columns: 1fr; } .prefilled-row { grid-template-columns: 1fr; } }
+  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .radio-opt { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid #D1D5DB; border-radius: 20px; cursor: pointer; font-size: 13px; color: #374151; transition: all 0.15s; user-select: none; }
   .radio-opt input[type="radio"] { display: none; }
-
-  .radio-opt:has(input:checked) {
-    background: #14285A;
-    border-color: #14285A;
-    color: white;
-  }
-
-  .submit-btn {
-    width: 100%;
-    padding: 15px;
-    background: #2C5F2E;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
+  .radio-opt:has(input:checked) { background: #14285A; border-color: #14285A; color: white; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .section-repair { color: #C0392B; }
+  .section-credit { color: #D4860B; }
+  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 8px; gap: 12px; flex-wrap: wrap; }
+  .item-row:last-child { margin-bottom: 0; }
+  .item-name { font-size: 13px; font-weight: 600; color: #1F2937; flex: 1; min-width: 160px; }
+  .item-choice { display: flex; gap: 6px; flex-shrink: 0; }
+  .choice-btn { padding: 5px 12px; border: 1px solid #D1D5DB; border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer; background: white; color: #6B7280; transition: all 0.15s; font-family: inherit; }
+  .choice-btn.active-repair { background: #C0392B; border-color: #C0392B; color: white; }
+  .choice-btn.active-credit { background: #D4860B; border-color: #D4860B; color: white; }
+  .choice-btn.active-neither { background: #6B7280; border-color: #6B7280; color: white; }
+  .divider { height: 1px; background: #E2E8F0; margin: 16px 0; }
+  .no-items { color: #9CA3AF; font-size: 13px; font-style: italic; padding: 6px 0; }
+  .submit-btn { width: 100%; padding: 15px; background: #2C5F2E; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .submit-btn:hover:not(:disabled) { background: #245026; }
   .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-  .status {
-    display: none;
-    margin-top: 14px;
-    padding: 14px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .status.loading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #F0FAF0;
-    color: #2C5F2E;
-    border: 1px solid #A8D5AA;
-  }
-
-  .status.error {
-    display: block;
-    background: #FDEDEC;
-    color: #C0392B;
-    border: 1px solid #F5C6C2;
-  }
-
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid #A8D5AA;
-    border-top-color: #2C5F2E;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    flex-shrink: 0;
-  }
-
+  .status { display: none; margin-top: 14px; padding: 14px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+  .status.loading { display: flex; align-items: center; gap: 12px; background: #F0FAF0; color: #2C5F2E; border: 1px solid #A8D5AA; }
+  .status.error { display: block; background: #FDEDEC; color: #C0392B; border: 1px solid #F5C6C2; }
+  .spinner { width: 20px; height: 20px; border: 2px solid #A8D5AA; border-top-color: #2C5F2E; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .contact-footer {
-    text-align: center;
-    padding: 20px 16px 28px;
-    color: #6B7280;
-    font-size: 12.5px;
-    line-height: 1.8;
-  }
-
+  .contact-footer { text-align: center; padding: 20px 16px 28px; color: #6B7280; font-size: 12.5px; line-height: 1.8; }
   .contact-footer strong { color: #14285A; }
 </style>
 </head>
@@ -233,39 +66,52 @@
 </header>
 
 <div class="intro-bar">
-  Answer a few questions about your deal and get a tailored negotiation strategy PDF in about 30 seconds.
+  Your inspection details are pre-filled. Select how you want to approach each item, then answer the deal context questions.
 </div>
 
 <main>
-
   <div class="property-badge">
-    <strong id="propertyDisplay">Loading property...</strong>
-    <span>Agent Advisory — Negotiation Addendum</span>
+    <strong id="propertyDisplay">Loading...</strong>
+    <span id="dateDisplay"></span>
   </div>
 
   <form id="negForm">
     <input type="hidden" name="property_address" id="property_address">
-    <input type="hidden" name="inspection_date" id="inspection_date">
+    <input type="hidden" name="inspection_date"  id="inspection_date">
+    <input type="hidden" name="agent_name"       id="agent_name">
+    <input type="hidden" name="agent_company"    id="agent_company">
+    <input type="hidden" name="item_selections"  id="item_selections">
 
     <!-- Agent Info -->
     <div class="card">
-      <h2><span class="icon">👤</span> Your Information</h2>
-      <div class="two-col">
-        <div class="field">
-          <label>Your Name</label>
-          <input type="text" name="agent_name" placeholder="Beth Cupari" required>
-        </div>
-        <div class="field">
-          <label>Brokerage</label>
-          <input type="text" name="agent_company" placeholder="Coastal Properties Group">
-        </div>
+      <h2><span class="icon">👤</span> Agent Information</h2>
+      <div class="prefilled-row">
+        <div class="prefilled-info"><strong>Agent Name</strong><span id="display_agent_name">—</span></div>
+        <div class="prefilled-info"><strong>Brokerage</strong><span id="display_agent_co">—</span></div>
+      </div>
+    </div>
+
+    <!-- Negotiation Items -->
+    <div class="card">
+      <h2><span class="icon">📋</span> Items to Negotiate</h2>
+      <p style="font-size:13px;color:#6B7280;margin-bottom:16px;">For each item, select how you want to approach it. Default selections match the brief recommendation — adjust as needed.</p>
+
+      <div id="repair_section">
+        <div class="section-label section-repair">Repair Addendum Items</div>
+        <div id="repair_items_list"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="credit_section">
+        <div class="section-label section-credit">Credit Request Items</div>
+        <div id="credit_items_list"></div>
       </div>
     </div>
 
     <!-- Seller Situation -->
     <div class="card">
       <h2><span class="icon">🏠</span> Seller Situation</h2>
-
       <div class="field">
         <label>Seller Type</label>
         <div class="radio-group">
@@ -275,7 +121,6 @@
           <label class="radio-opt"><input type="radio" name="seller_type" value="Unknown"> Unknown</label>
         </div>
       </div>
-
       <div class="field">
         <label>Property Occupancy</label>
         <div class="radio-group">
@@ -284,14 +129,10 @@
           <label class="radio-opt"><input type="radio" name="occupancy" value="Vacant"> Vacant</label>
         </div>
       </div>
-
       <div class="field">
-        <label>Reason for Selling
-          <span class="sub">If known — job relocation, downsizing, divorce, financial, etc.</span>
-        </label>
+        <label>Reason for Selling<span class="sub">If known — relocation, downsizing, divorce, financial, etc.</span></label>
         <input type="text" name="reason_selling" placeholder="e.g. Relocating for work">
       </div>
-
       <div class="two-col">
         <div class="field">
           <label>Previously Listed?</label>
@@ -316,7 +157,6 @@
     <!-- Deal Dynamics -->
     <div class="card">
       <h2><span class="icon">📊</span> Deal Dynamics</h2>
-
       <div class="two-col">
         <div class="field">
           <label>Days on Market</label>
@@ -331,7 +171,6 @@
           </div>
         </div>
       </div>
-
       <div class="two-col">
         <div class="field">
           <label>List Price ($)</label>
@@ -342,11 +181,8 @@
           <input type="text" name="offer_price" placeholder="e.g. 510,000">
         </div>
       </div>
-
       <div class="field">
-        <label>Concessions Already in Contract
-          <span class="sub">Closing cost contributions, repairs already agreed to, etc.</span>
-        </label>
+        <label>Concessions Already in Contract<span class="sub">Closing cost credits, repairs already agreed to, etc.</span></label>
         <input type="text" name="concessions" placeholder="e.g. $5,000 closing cost credit already agreed">
       </div>
     </div>
@@ -354,7 +190,6 @@
     <!-- Inspection Context -->
     <div class="card">
       <h2><span class="icon">🔍</span> Inspection Context</h2>
-
       <div class="field">
         <label>Was the seller aware of any major findings prior to this inspection?</label>
         <div class="radio-group">
@@ -364,7 +199,6 @@
           <label class="radio-opt"><input type="radio" name="seller_aware" value="Unknown"> Unknown</label>
         </div>
       </div>
-
       <div class="two-col">
         <div class="field">
           <label>Previous inspection that fell through?</label>
@@ -383,21 +217,17 @@
           </div>
         </div>
       </div>
-
       <div class="field">
-        <label>Key findings you want to address
-          <span class="sub">List the items from the brief you plan to negotiate on</span>
-        </label>
-        <textarea name="key_findings" placeholder="e.g. Active moisture intrusion, non-functional fireplace, pool deficiencies, insulation gaps"></textarea>
+        <label>Additional context about the findings<span class="sub">Anything specific about the items above you want to flag</span></label>
+        <textarea name="key_findings" placeholder="e.g. Nick mentioned the moisture issue appeared related to the window seal above it..."></textarea>
       </div>
     </div>
 
     <!-- Agent Read -->
     <div class="card">
       <h2><span class="icon">🎯</span> Your Read on the Deal</h2>
-
       <div class="field">
-        <label>How flexible do you think the seller will be on inspection items?</label>
+        <label>How flexible do you think the seller will be?</label>
         <div class="radio-group">
           <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Very flexible — motivated to close"> Very flexible</label>
           <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Somewhat flexible"> Somewhat flexible</label>
@@ -405,7 +235,6 @@
           <label class="radio-opt"><input type="radio" name="seller_flexibility" value="Unknown"> Unknown</label>
         </div>
       </div>
-
       <div class="field">
         <label>Buyer's risk tolerance</label>
         <div class="radio-group">
@@ -414,18 +243,13 @@
           <label class="radio-opt"><input type="radio" name="buyer_risk" value="High — willing to take the house as-is with credit"> High — willing to take as-is</label>
         </div>
       </div>
-
       <div class="field">
-        <label>Anything else I should know about this deal?
-          <span class="sub">Relationship dynamics, listing agent personality, any other context</span>
-        </label>
-        <textarea name="other_context" placeholder="e.g. Listing agent is aggressive, seller has already moved out, buyer is emotionally attached to the home..."></textarea>
+        <label>Anything else I should know about this deal?<span class="sub">Listing agent personality, relationship dynamics, buyer situation, anything else</span></label>
+        <textarea name="other_context" placeholder="e.g. Listing agent is known to be aggressive, buyer is emotionally attached to the home..."></textarea>
       </div>
     </div>
 
-    <button type="submit" class="submit-btn" id="submitBtn">
-      Generate My Negotiation Strategy
-    </button>
+    <button type="submit" class="submit-btn" id="submitBtn">Generate My Negotiation Strategy</button>
 
     <div class="status loading" id="statusLoading">
       <div class="spinner"></div>
@@ -434,9 +258,7 @@
         <div style="font-size:12px;color:#2C5F2E;margin-top:3px">Building your tailored strategy — about 30 seconds</div>
       </div>
     </div>
-
     <div class="status error" id="statusError"></div>
-
   </form>
 </main>
 
@@ -447,17 +269,73 @@
 </div>
 
 <script>
-  // Pre-fill property from URL params
   const params = new URLSearchParams(window.location.search);
-  const addr = params.get('property') || '';
-  const date = params.get('date') || '';
+  const addr      = params.get('property')   || '';
+  const date      = params.get('date')       || '';
+  const agentName = params.get('agent_name') || '';
+  const agentCo   = params.get('agent_co')   || '';
 
-  document.getElementById('property_address').value = addr;
-  document.getElementById('inspection_date').value = date;
-  document.getElementById('propertyDisplay').textContent = addr || 'Agent Advisory Negotiation';
+  document.getElementById('property_address').value       = addr;
+  document.getElementById('inspection_date').value        = date;
+  document.getElementById('agent_name').value             = agentName;
+  document.getElementById('agent_company').value          = agentCo;
+  document.getElementById('propertyDisplay').textContent  = addr || 'Agent Advisory Negotiation';
+  document.getElementById('dateDisplay').textContent      = date ? 'Inspection date: ' + date : 'Agent Advisory supplement';
+  document.getElementById('display_agent_name').textContent = agentName || '—';
+  document.getElementById('display_agent_co').textContent   = agentCo   || '—';
+
+  let repairItems = [], creditItems = [];
+  try { repairItems = JSON.parse(params.get('repair') || '[]'); } catch(e) {}
+  try { creditItems = JSON.parse(params.get('credit') || '[]'); } catch(e) {}
+
+  const selections = {};
+
+  function buildItems(items, defaultChoice, containerId) {
+    const container = document.getElementById(containerId);
+    if (!items.length) {
+      container.innerHTML = '<div class="no-items">No items in this category</div>';
+      return;
+    }
+    items.forEach(item => {
+      selections[item] = defaultChoice;
+      const row = document.createElement('div');
+      row.className = 'item-row';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'item-name';
+      nameEl.textContent = item;
+
+      const choiceDiv = document.createElement('div');
+      choiceDiv.className = 'item-choice';
+
+      ['Repair','Credit','Neither'].forEach(choice => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = choice;
+        btn.className = 'choice-btn' + (choice === defaultChoice ? ' active-' + choice.toLowerCase() : '');
+        btn.addEventListener('click', () => {
+          selections[item] = choice;
+          choiceDiv.querySelectorAll('.choice-btn').forEach(b => b.className = 'choice-btn');
+          btn.className = 'choice-btn active-' + choice.toLowerCase();
+        });
+        choiceDiv.appendChild(btn);
+      });
+
+      row.appendChild(nameEl);
+      row.appendChild(choiceDiv);
+      container.appendChild(row);
+    });
+  }
+
+  buildItems(repairItems, 'Repair', 'repair_items_list');
+  buildItems(creditItems, 'Credit', 'credit_items_list');
+
+  const steps = ['Analyzing your deal context...','Assessing leverage position...','Prioritizing negotiation items...','Building your strategy...'];
 
   document.getElementById('negForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    document.getElementById('item_selections').value = JSON.stringify(selections);
+
     const btn = document.getElementById('submitBtn');
     const loading = document.getElementById('statusLoading');
     const errorEl = document.getElementById('statusError');
@@ -466,30 +344,15 @@
     loading.style.display = 'flex';
     errorEl.style.display = 'none';
 
-    const steps = [
-      'Analyzing your deal context...',
-      'Assessing leverage position...',
-      'Prioritizing negotiation items...',
-      'Building your strategy...',
-    ];
     let i = 0;
     const timer = setInterval(() => {
-      i = Math.min(i + 1, steps.length - 1);
+      i = Math.min(i+1, steps.length-1);
       document.getElementById('statusText').textContent = steps[i];
     }, 8000);
 
     try {
-      const formData = new FormData(this);
-      const response = await fetch('/negotiate/generate', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Generation failed. Please try again.');
-      }
-
+      const response = await fetch('/negotiate/generate', { method: 'POST', body: new FormData(this) });
+      if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'Generation failed.'); }
       const blob = await response.blob();
       const disposition = response.headers.get('Content-Disposition') || '';
       const match = disposition.match(/filename="?([^"]+)"?/);
@@ -500,8 +363,7 @@
       document.body.appendChild(a); a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-    } catch (err) {
+    } catch(err) {
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
     } finally {
