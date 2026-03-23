@@ -467,11 +467,29 @@ def build_pdf(data, logo_path, output_path):
             story.append(Spacer(1,6))
         story.append(Spacer(1,4))
 
-    # TAILORED INPUTS
-    prop_addr = data.get('property', {}).get('address', '')
-    insp_date = data.get('property', {}).get('inspection_date', '')
-    import urllib.parse
-    neg_url = f"/negotiate?property={urllib.parse.quote(prop_addr)}&date={urllib.parse.quote(insp_date)}"
+    # TAILORED INPUTS — encode all context into questionnaire URL
+    prop_addr  = data.get('property', {}).get('address', '')
+    insp_date  = data.get('property', {}).get('inspection_date', '')
+    agent_name = data.get('property', {}).get('agent_name', '')
+    agent_co   = data.get('property', {}).get('agent_company', '')
+    neg        = data.get('negotiation', {})
+
+    # Build item lists for checkboxes
+    repair_items  = [r.get('item','') for r in neg.get('addendum', []) if r.get('item')]
+    credit_items  = [r.get('item','') for r in neg.get('credit', [])   if r.get('item')]
+
+    import urllib.parse, json as _json
+
+    base_url = "https://hope-agent-brief.onrender.com/negotiate"
+    params = urllib.parse.urlencode({
+        'property':    prop_addr,
+        'date':        insp_date,
+        'agent_name':  agent_name,
+        'agent_co':    agent_co,
+        'repair':      _json.dumps(repair_items),
+        'credit':      _json.dumps(credit_items),
+    })
+    full_url = f"{base_url}?{params}"
 
     story.append(KeepTogether([hdr("TAILORED NEGOTIATION INPUTS",
         "Get a deal-specific strategy by answering a few questions about your transaction.",NAVY,ST),
@@ -483,9 +501,13 @@ def build_pdf(data, logo_path, output_path):
             ST['nq']),
         Spacer(1,6),
         Paragraph(
-            f"<b>Get your tailored strategy:</b> Visit <b>https://hope-agent-brief.onrender.com/negotiate"
-            f"?property={urllib.parse.quote(prop_addr)}</b> on any device. "
-            "Answer 10 questions and download your Negotiation Addendum PDF in about 30 seconds.",
+            f"<b>Get your tailored strategy:</b> Visit <b>hope-agent-brief.onrender.com/negotiate</b> "
+            "on any device. Your findings and agent information will be pre-filled. "
+            "Answer the deal context questions and download your Negotiation Addendum PDF in about 30 seconds.",
+            ST['nq']),
+        Spacer(1,6),
+        Paragraph(
+            f"<b>Direct link:</b> {full_url}",
             ST['nq']),
         Spacer(1,6),
         Paragraph(
