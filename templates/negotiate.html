@@ -360,16 +360,9 @@
     }, 1000);
     try {
       const response = await fetch('/negotiate/generate', { method: 'POST', body: new FormData(this) });
-      if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'Generation failed.'); }
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(blobUrl); }, 1000);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Generation failed.');
+      window.location.href = result.pdf_url;
     } catch(err) {
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
