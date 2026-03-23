@@ -282,7 +282,7 @@ OUTPUT FORMAT — return ONLY valid JSON, no markdown, no preamble:
     raw = raw.strip().rstrip("```").strip()
     return json.loads(raw)
 
-def build_pdf(data, logo_path, output_path):
+def build_pdf(data, logo_path, output_path, session_id=None):
     """Build the PDF from structured data."""
     ST = mk_styles()
     doc = SimpleDocTemplate(output_path, pagesize=letter,
@@ -467,29 +467,15 @@ def build_pdf(data, logo_path, output_path):
             story.append(Spacer(1,6))
         story.append(Spacer(1,4))
 
-    # TAILORED INPUTS — encode all context into questionnaire URL
+    # TAILORED INPUTS — short URL using session ID
     prop_addr  = data.get('property', {}).get('address', '')
     insp_date  = data.get('property', {}).get('inspection_date', '')
-    agent_name = data.get('property', {}).get('agent_name', '')
-    agent_co   = data.get('property', {}).get('agent_company', '')
-    neg        = data.get('negotiation', {})
 
-    # Build item lists for checkboxes
-    repair_items  = [r.get('item','') for r in neg.get('addendum', []) if r.get('item')]
-    credit_items  = [r.get('item','') for r in neg.get('credit', [])   if r.get('item')]
-
-    import urllib.parse, json as _json
-
-    base_url = "https://hope-agent-brief.onrender.com/negotiate"
-    params = urllib.parse.urlencode({
-        'property':    prop_addr,
-        'date':        insp_date,
-        'agent_name':  agent_name,
-        'agent_co':    agent_co,
-        'repair':      _json.dumps(repair_items),
-        'credit':      _json.dumps(credit_items),
-    })
-    full_url = f"{base_url}?{params}"
+    base_url = "https://hope-agent-brief.onrender.com"
+    if session_id:
+        neg_url = f"{base_url}/negotiate/{session_id}"
+    else:
+        neg_url = f"{base_url}/negotiate"
 
     story.append(KeepTogether([hdr("TAILORED NEGOTIATION INPUTS",
         "Get a deal-specific strategy by answering a few questions about your transaction.",NAVY,ST),
@@ -501,14 +487,12 @@ def build_pdf(data, logo_path, output_path):
             ST['nq']),
         Spacer(1,6),
         Paragraph(
-            f"<b>Get your tailored strategy:</b> Visit <b>hope-agent-brief.onrender.com/negotiate</b> "
-            "on any device. Your findings and agent information will be pre-filled. "
-            "Answer the deal context questions and download your Negotiation Addendum PDF in about 30 seconds.",
+            f"<b>Get your tailored strategy:</b> Visit the link below on any device. "
+            "Your agent information and negotiation items will be pre-filled. "
+            "Answer the deal context questions and download your Negotiation Addendum PDF in about 30 to 60 seconds.",
             ST['nq']),
         Spacer(1,6),
-        Paragraph(
-            f"<b>Direct link:</b> {full_url}",
-            ST['nq']),
+        Paragraph(f"<b>{neg_url}</b>", ST['nq']),
         Spacer(1,6),
         Paragraph(
             "Questions? Reach Nick directly at <b>(813) 777-6265</b> call or text, "
@@ -564,18 +548,34 @@ def generate():
             fourpoint_text, windmit_text, wdo_text
         )
 
-        # Build PDF
+        # Save negotiation context with a short ID for the questionnaire URL
+        import secrets
+        session_id = secrets.token_urlsafe(6)  # e.g. "aB3xYz"
+        session_dir = os.path.join(os.path.dirname(__file__), 'sessions')
+        os.makedirs(session_dir, exist_ok=True)
+        session_data = {
+            'property_address': data.get('property', {}).get('address', ''),
+            'inspection_date':  data.get('property', {}).get('inspection_date', ''),
+            'agent_name':       data.get('property', {}).get('agent_name', ''),
+            'agent_company':    data.get('property', {}).get('agent_company', ''),
+            'repair_items':     [r.get('item','') for r in data.get('negotiation',{}).get('addendum',[]) if r.get('item')],
+            'credit_items':     [r.get('item','') for r in data.get('negotiation',{}).get('credit',[])   if r.get('item')],
+        }
+        with open(os.path.join(session_dir, f'{session_id}.json'), 'w') as sf:
+            json.dump(session_data, sf)
+
+        # Build PDF — pass session_id so the brief prints a clean short URL
         logo_path = get_logo_path()
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
             output_path = f.name
 
-        build_pdf(data, logo_path, output_path)
+        build_pdf(data, logo_path, output_path, session_id=session_id)
 
         address = data.get('property', {}).get('address', 'Agent_Advisory')
         safe_addr = "".join(c for c in address if c.isalnum() or c in ' _-').strip().replace(' ', '_')
         filename = f"Agent_Advisory_{safe_addr}.pdf"
 
-        return send_file(output_path, as_attachment=True,
+        return send_file(output_path, as_attachment=False,
                         download_name=filename, mimetype='application/pdf')
 
     except json.JSONDecodeError as e:
@@ -590,8 +590,19 @@ if __name__ == '__main__':
 
 # ── Negotiation routes ─────────────────────────────────────────────
 @app.route('/negotiate')
-def negotiate_form():
-    return render_template('negotiate.html')
+@app.route('/negotiate/<session_id>')
+def negotiate_form(session_id=None):
+    return render_template('negotiate.html', session_id=session_id or '')
+
+@app.route('/negotiate/data/<session_id>')
+def negotiate_data(session_id):
+    """Return stored brief context for the questionnaire to pre-fill."""
+    session_dir = os.path.join(os.path.dirname(__file__), 'sessions')
+    path = os.path.join(session_dir, f'{session_id}.json')
+    if not os.path.exists(path):
+        return jsonify({'error': 'Session not found'}), 404
+    with open(path) as f:
+        return jsonify(json.load(f))
 
 @app.route('/negotiate/generate', methods=['POST'])
 def negotiate_generate():
@@ -611,7 +622,7 @@ def negotiate_generate():
         safe = "".join(c for c in addr if c.isalnum() or c in ' _-').strip().replace(' ', '_')
         filename = f"Negotiation_Addendum_{safe}.pdf"
 
-        return send_file(output_path, as_attachment=True,
+        return send_file(output_path, as_attachment=False,
                         download_name=filename, mimetype='application/pdf')
 
     except Exception as e:
